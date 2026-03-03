@@ -1,6 +1,8 @@
 # WordPress Theme: Semantic Release & GitHub Deployment
 
-A [Claude Code skill](https://docs.anthropic.com/en/docs/claude-code/skills) that sets up a complete automated release pipeline for any WordPress theme in minutes.
+[![My Services](https://img.shields.io/badge/My_Services-shift64.com-d97757?style=for-the-badge)](https://shift64.com)
+
+A [Claude Code skill](https://code.claude.com/docs/en/skills) that sets up a complete automated release pipeline for any WordPress theme in minutes.
 
 ## What it does
 
@@ -90,6 +92,10 @@ beta     -->  PR to main  -->  v1.3.0 (stable)
 - [Claude Code](https://claude.ai/code) CLI
 - A WordPress theme hosted on GitHub
 - Node.js (for semantic-release)
+
+## Author
+
+Built by [Mateusz Zadorozny](https://shift64.com) — WordPress & WooCommerce development, B2B e-commerce, CI/CD automation.
 
 ## License
 
