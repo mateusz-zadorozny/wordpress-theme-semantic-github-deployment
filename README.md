@@ -87,11 +87,24 @@ feature  -->  PR to staging  -->  v1.3.0-staging.1
 staging  -->  PR to main     -->  v1.3.0 (stable)
 ```
 
+## What gets installed in your project
+
+The skill adds these npm devDependencies to your theme's `package.json`:
+
+| Package | Version | Purpose |
+|---|---|---|
+| `semantic-release` | ^25.0.0 | Core engine — analyzes commits, calculates versions, orchestrates plugins |
+| `@semantic-release/changelog` | ^6.0.3 | Generates and updates `CHANGELOG.md` |
+| `@semantic-release/git` | ^10.0.1 | Commits version bumps and changelog back to the repo |
+| `@semantic-release/exec` | ^7.1.0 | Runs `build-release.sh` (or `sed`) to update `style.css` version |
+
+These are **devDependencies only** — they run in GitHub Actions CI, never on your WordPress site. Your theme's production code is not affected.
+
 ## Requirements
 
 - [Claude Code](https://claude.ai/code) CLI
 - A WordPress theme hosted on GitHub
-- Node.js (for semantic-release)
+- Node.js (for semantic-release — only needed locally for `npm install`, then CI handles the rest)
 
 ## Author
 
