@@ -20,20 +20,14 @@ Tell Claude to set up releases for your WordPress theme and this skill handles e
 
 ## Installation
 
-### Option 1: Install from URL
-
-```bash
-claude install-skill https://github.com/mateusz-zadorozny/wordpress-theme-semantic-github-deployment
-```
-
-### Option 2: Manual install
-
 Clone this repo into your Claude Code skills directory:
 
 ```bash
 git clone https://github.com/mateusz-zadorozny/wordpress-theme-semantic-github-deployment.git \
   ~/.claude/skills/wordpress-theme-semantic-github-deployment
 ```
+
+That's it. The skill is available immediately in all your Claude Code sessions.
 
 ## Usage
 
