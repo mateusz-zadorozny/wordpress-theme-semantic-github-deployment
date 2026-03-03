@@ -38,7 +38,7 @@ git clone https://github.com/mateusz-zadorozny/wordpress-theme-semantic-github-d
 
 Then commit `.claude/skills/` to version control so everyone on the team gets the skill.
 
-The skill is available immediately — no restart needed.
+Start a new Claude Code conversation to make the skill available.
 
 ## Usage
 
@@ -81,10 +81,10 @@ PR title examples:
   docs: update README               --> no release
 ```
 
-With pre-release enabled:
+With pre-release enabled (tag uses the branch name as identifier):
 ```
-feature  -->  PR to beta  -->  v1.3.0-beta.1
-beta     -->  PR to main  -->  v1.3.0 (stable)
+feature  -->  PR to staging  -->  v1.3.0-staging.1
+staging  -->  PR to main     -->  v1.3.0 (stable)
 ```
 
 ## Requirements
