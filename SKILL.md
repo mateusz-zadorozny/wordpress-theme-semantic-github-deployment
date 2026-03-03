@@ -178,11 +178,22 @@ Present clear, actionable next steps with specific instructions.
 
 ### Creating the first release:
 
+> **Important: first release gotcha.** On some repos (especially private repos on GitHub Free), squash-merging a PR may not trigger the Release workflow on the target branch. This can happen because the workflow file is being introduced for the first time, or due to GitHub's internal token permissions for PR merges.
+>
+> **Workaround:** If the workflow doesn't trigger after merging, push any commit directly to `{{MAIN_BRANCH}}`:
+> ```bash
+> git checkout {{MAIN_BRANCH}} && git pull
+> git commit --allow-empty -m "ci: trigger release workflow"
+> git push origin {{MAIN_BRANCH}}
+> ```
+> Direct pushes reliably trigger workflows. Once the first release is created, subsequent squash-merges typically work fine.
+
 5. Commit the setup, push, and create a PR with a conventional title:
    ```
    feat: add automated release pipeline
    ```
-6. After squash-merging, semantic-release creates the first version automatically.
+6. After squash-merging, check the Actions tab. If the Release workflow didn't trigger, use the direct push workaround above.
+7. The first stable version is created automatically.
 
 ### Daily workflow cheat sheet:
 
@@ -198,6 +209,8 @@ PR title → version bump:
 
 If pre-release:
 ```
-feature → PR to beta → v1.3.0-beta.1
-beta    → PR to main → v1.3.0 (stable)
+feature → PR to {{BETA_BRANCH}} → v1.3.0-{{BETA_BRANCH}}.1
+{{BETA_BRANCH}} → PR to {{MAIN_BRANCH}} → v1.3.0 (stable)
 ```
+
+> Note: the pre-release identifier in the version tag matches the branch name (e.g. `staging` → `v1.3.0-staging.1`, `beta` → `v1.3.0-beta.1`).

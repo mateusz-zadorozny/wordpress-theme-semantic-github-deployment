@@ -26,6 +26,8 @@ Everything else is constant. Compose the final config by picking the right branc
 ]
 ```
 
+> **How `"prerelease": true` works:** When set to `true`, semantic-release uses the **branch name** as the pre-release identifier. So a branch named `staging` produces `v1.0.0-staging.1`, and a branch named `beta` produces `v1.0.0-beta.1`. This is intentional — the tag always matches the branch name, making it clear where a release came from. No extra configuration needed.
+
 ## Plugins: without ZIP assets
 
 When there's no ZIP, the `exec` plugin updates `style.css` directly via `sed`, and `@semantic-release/git` commits the changed files back.

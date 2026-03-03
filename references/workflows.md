@@ -60,6 +60,7 @@ Everything else stays the same. Semantic-release reads `.releaserc.json` to know
 
 ### Notes on the workflow:
 
+- **First release gotcha:** On some repos (especially private repos on GitHub Free), squash-merging a PR may not trigger the Release workflow on the target branch. This can happen even when the workflow file already exists. If the workflow doesn't trigger after a squash-merge, push any commit directly to `{{MAIN_BRANCH}}` (e.g. `git commit --allow-empty -m "ci: trigger release workflow" && git push origin {{MAIN_BRANCH}}`). Direct pushes reliably trigger workflows. Once the first release is created, subsequent squash-merges typically work fine. The fix is to merge a second PR (any follow-up change) to trigger the first release.
 - **`fetch-depth: 0`** — semantic-release needs the full git history to analyze commits and determine the next version.
 - **`persist-credentials: false`** — prevents the default GITHUB_TOKEN from being used for git operations. Semantic-release manages its own authentication via the `GITHUB_TOKEN` env var, which lets it push commits (version bump) and create releases.
 - **`GITHUB_TOKEN`** — this is the built-in GitHub Actions token. No custom secrets needed. It has write access to contents, issues, and PRs because of the `permissions` block.

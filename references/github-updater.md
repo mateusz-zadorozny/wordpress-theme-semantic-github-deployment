@@ -49,6 +49,16 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Safety: skip updater on beta installs (ZIP creates a -beta directory)
+if (str_ends_with(get_stylesheet(), '-beta')) {
+    return;
+}
+
+// Safety: allow disabling updater via wp-config.php (useful for staging sites using git pull)
+if (defined('{{PREFIX_UPPER}}_DISABLE_UPDATER') && {{PREFIX_UPPER}}_DISABLE_UPDATER) {
+    return;
+}
+
 class {{PREFIX}}_GitHub_Updater_Loader {
     public function __construct() {
         $this->load_components();
@@ -84,6 +94,16 @@ add_action('plugins_loaded', '{{PREFIX}}_init_github_updater', 5);
 ```
 
 For **public repos**, remove the lines between `PRIVATE_REPO_ONLY` comments.
+
+### Updater safety guards (always included)
+
+The loader has two early-return guards that prevent the updater from running on non-production environments:
+
+1. **Beta slug check** (`str_ends_with(get_stylesheet(), '-beta')`) — When a beta ZIP is installed, `build-release.sh` creates a directory named `{{THEME_SLUG}}-beta`. This guard detects that and skips the updater entirely, preventing a stable release from overwriting the beta install.
+
+2. **Disable constant** (`{{PREFIX_UPPER}}_DISABLE_UPDATER`) — For staging sites that use `git pull` (same directory name as production), the admin can add `define('{{PREFIX_UPPER}}_DISABLE_UPDATER', true);` to `wp-config.php` to suppress the updater. This prevents the stable release from being offered as an "update" over a beta version.
+
+**Why both?** The beta slug check handles ZIP-based installs automatically (no config needed). The disable constant handles git-based staging where the directory name doesn't change. Together they cover all staging scenarios.
 
 ---
 

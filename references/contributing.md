@@ -118,20 +118,22 @@ npm install --save-dev semantic-release @semantic-release/changelog @semantic-re
 ### If pre-release is enabled, replace `REPLACE_WITH_BETA_SECTION_OR_REMOVE` with:
 
 ```markdown
-## Pre-release (Beta) Channel
+## Pre-release Channel (`{{BETA_BRANCH}}`)
 
 For features that need testing before a stable release:
 
 1. Create a PR targeting `{{BETA_BRANCH}}` instead of `{{MAIN_BRANCH}}`
-2. After squash-merging, a pre-release is created: `v1.3.0-beta.1`
-3. Subsequent merges to `{{BETA_BRANCH}}` increment: `beta.2`, `beta.3`, etc.
+2. After squash-merging, a pre-release is created: `v1.3.0-{{BETA_BRANCH}}.1`
+3. Subsequent merges to `{{BETA_BRANCH}}` increment: `{{BETA_BRANCH}}.2`, `{{BETA_BRANCH}}.3`, etc.
 4. When ready for stable release: create a PR from `{{BETA_BRANCH}}` → `{{MAIN_BRANCH}}`
 5. After merging, the stable version `v1.3.0` is released
 
 ```
-feature → PR to {{BETA_BRANCH}} → v1.3.0-beta.1
+feature → PR to {{BETA_BRANCH}} → v1.3.0-{{BETA_BRANCH}}.1
 {{BETA_BRANCH}} → PR to {{MAIN_BRANCH}} → v1.3.0 (stable)
 ```
+
+> **Note:** The pre-release identifier in the version tag always matches the branch name. If your pre-release branch is called `staging`, versions will be `v1.3.0-staging.1`. If it's called `beta`, versions will be `v1.3.0-beta.1`.
 ```
 
 ### If pre-release is NOT enabled, remove the placeholder line entirely.
@@ -145,3 +147,30 @@ Each GitHub Release includes a `{{THEME_SLUG}}.zip` file — a clean, installabl
 ```
 
 ### If ZIP assets are NOT enabled, remove the placeholder line entirely.
+
+### If WP Admin updater is enabled, add this section after Release Assets (or after the last optional section):
+
+```markdown
+## WP Admin Auto-Updater
+
+The theme includes a built-in auto-updater that integrates with the WordPress Dashboard. It checks GitHub for new releases and offers one-click updates.
+
+**The auto-updater only tracks stable releases** (from `{{MAIN_BRANCH}}`). Pre-release versions from `{{BETA_BRANCH}}` are invisible to it — GitHub's `/releases/latest` API endpoint excludes pre-releases by design.
+
+| Environment | How it gets updates | Auto-update? |
+|---|---|---|
+| **Production** (`{{MAIN_BRANCH}}` releases) | Dashboard widget + one-click "Update now" | Yes |
+| **Staging** (`{{BETA_BRANCH}}` pre-releases) | Download ZIP from GitHub Releases or `git pull` | No — manual only |
+
+This is a safety feature: you don't want an untested pre-release landing on production. Staging/dev environments are updated manually, giving you full control over what's being tested.
+
+### Disabling the updater on staging
+
+If your staging site runs the same theme directory (e.g. via `git pull`), add this to its `wp-config.php` to prevent the updater from offering stable versions as "updates" over your pre-release code:
+
+```php
+define('{{PREFIX_UPPER}}_DISABLE_UPDATER', true);
+```
+```
+
+### If WP Admin updater is NOT enabled, do not add this section.
