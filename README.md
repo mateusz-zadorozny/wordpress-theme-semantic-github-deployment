@@ -20,14 +20,23 @@ Tell Claude to set up releases for your WordPress theme and this skill handles e
 
 ## Installation
 
-Clone this repo into your Claude Code skills directory:
+### Per user (available in all your projects)
 
 ```bash
 git clone https://github.com/mateusz-zadorozny/wordpress-theme-semantic-github-deployment.git \
   ~/.claude/skills/wordpress-theme-semantic-github-deployment
 ```
 
-That's it. The skill is available immediately in all your Claude Code sessions.
+### Per project (available only in this repo, shared with your team)
+
+```bash
+git clone https://github.com/mateusz-zadorozny/wordpress-theme-semantic-github-deployment.git \
+  .claude/skills/wordpress-theme-semantic-github-deployment
+```
+
+Then commit `.claude/skills/` to version control so everyone on the team gets the skill.
+
+The skill is available immediately — no restart needed.
 
 ## Usage
 
