@@ -115,28 +115,41 @@ npm install --save-dev semantic-release @semantic-release/changelog @semantic-re
 
 ## Conditional sections
 
-### If pre-release is enabled, replace `REPLACE_WITH_BETA_SECTION_OR_REMOVE` with:
+### If beta testing is enabled, replace `REPLACE_WITH_BETA_SECTION_OR_REMOVE` with:
 
 ```markdown
-## Pre-release Channel (`{{BETA_BRANCH}}`)
+## Beta Testing
 
-For features that need testing before a stable release:
+For testing changes before a stable release, use `beta.sh`:
 
-1. Create a PR targeting `{{BETA_BRANCH}}` instead of `{{MAIN_BRANCH}}`
-2. After squash-merging, a pre-release is created: `v1.3.0-{{BETA_BRANCH}}.1`
-3. Subsequent merges to `{{BETA_BRANCH}}` increment: `{{BETA_BRANCH}}.2`, `{{BETA_BRANCH}}.3`, etc.
-4. When ready for stable release: create a PR from `{{BETA_BRANCH}}` → `{{MAIN_BRANCH}}`
-5. After merging, the stable version `v1.3.0` is released
-
-```
-feature → PR to {{BETA_BRANCH}} → v1.3.0-{{BETA_BRANCH}}.1
-{{BETA_BRANCH}} → PR to {{MAIN_BRANCH}} → v1.3.0 (stable)
+```bash
+bash beta.sh
 ```
 
-> **Note:** The pre-release identifier in the version tag always matches the branch name. If your pre-release branch is called `staging`, versions will be `v1.3.0-staging.1`. If it's called `beta`, versions will be `v1.3.0-beta.1`.
+This creates `{{THEME_SLUG}}-beta.zip` — a clean package with:
+- Directory name `{{THEME_SLUG}}-beta` (WordPress treats it as a separate theme)
+- Theme Name suffixed with "(Beta)" for easy identification in WP Admin
+
+Install the ZIP via WordPress Admin → Themes → Add New → Upload Theme. The beta runs side-by-side with the stable version.
 ```
 
-### If pre-release is NOT enabled, remove the placeholder line entirely.
+### If beta testing + GitHub beta releases are both enabled, add this after the beta.sh section:
+
+```markdown
+### GitHub Beta Releases
+
+For sharing beta builds with the team without building locally:
+
+1. Go to **Actions** → **Beta Release** → **Run workflow**
+2. Select the branch you want to build from
+3. Click **Run workflow**
+
+This creates a GitHub pre-release with a downloadable ZIP. The version is automatically set to `{current}-beta.{run_number}` (e.g. `1.2.0-beta.15`).
+
+The WP Admin auto-updater ignores pre-releases, so beta builds never land on production accidentally.
+```
+
+### If beta testing is NOT enabled, remove the placeholder line entirely.
 
 ### If ZIP assets are enabled, replace `REPLACE_WITH_ZIP_SECTION_OR_REMOVE` with:
 
@@ -155,18 +168,18 @@ Each GitHub Release includes a `{{THEME_SLUG}}.zip` file — a clean, installabl
 
 The theme includes a built-in auto-updater that integrates with the WordPress Dashboard. It checks GitHub for new releases and offers one-click updates.
 
-**The auto-updater only tracks stable releases** (from `{{MAIN_BRANCH}}`). Pre-release versions from `{{BETA_BRANCH}}` are invisible to it — GitHub's `/releases/latest` API endpoint excludes pre-releases by design.
+**The auto-updater only tracks stable releases** (from `{{MAIN_BRANCH}}`). Beta pre-releases are invisible to it — GitHub's `/releases/latest` API endpoint excludes pre-releases by design.
 
 | Environment | How it gets updates | Auto-update? |
 |---|---|---|
-| **Production** (`{{MAIN_BRANCH}}` releases) | Dashboard widget + one-click "Update now" | Yes |
-| **Staging** (`{{BETA_BRANCH}}` pre-releases) | Download ZIP from GitHub Releases or `git pull` | No — manual only |
+| **Production** (stable releases) | Dashboard widget + one-click "Update now" | Yes |
+| **Staging** (beta builds) | `beta.sh` ZIP, GitHub beta release, or `git pull` | No — manual only |
 
-This is a safety feature: you don't want an untested pre-release landing on production. Staging/dev environments are updated manually, giving you full control over what's being tested.
+This is a safety feature: you don't want an untested beta landing on production. Staging/dev environments are updated manually, giving you full control over what's being tested.
 
 ### Disabling the updater on staging
 
-If your staging site runs the same theme directory (e.g. via `git pull`), add this to its `wp-config.php` to prevent the updater from offering stable versions as "updates" over your pre-release code:
+If your staging site runs the same theme directory (e.g. via `git pull`), add this to its `wp-config.php` to prevent the updater from offering stable versions as "updates" over your beta code:
 
 ```php
 define('{{PREFIX_UPPER}}_DISABLE_UPDATER', true);

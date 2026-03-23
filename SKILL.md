@@ -1,6 +1,6 @@
 ---
 name: wordpress-theme-semantic-github-deployment
-description: Use this skill any time a user wants to automate releases, versioning, or changelogs for a WordPress theme hosted on GitHub. This includes requests to set up semantic-release, add GitHub Actions, enforce conventional commits, auto-bump style.css version numbers, generate changelogs, create a release pipeline, or go from manual/no versioning to automated releases. Applies to all WordPress themes — custom, child, starter. Supports optional pre-release branches, ZIP build artifacts, and WP Admin update widgets. Do NOT use for SSH/FTP deployment, wordpress.org SVN publishing, semantic-release for non-WordPress projects (Node.js/npm), fixing an already-working semantic-release config, or Dependabot setup.
+description: Use this skill any time a user wants to automate releases, versioning, or changelogs for a WordPress theme hosted on GitHub. This includes requests to set up semantic-release, add GitHub Actions, enforce conventional commits, auto-bump style.css version numbers, generate changelogs, create a release pipeline, or go from manual/no versioning to automated releases. Applies to all WordPress themes — custom, child, starter. Supports optional beta testing (local beta.sh + GitHub Actions beta trigger), ZIP build artifacts, and WP Admin update widgets. Do NOT use for SSH/FTP deployment, wordpress.org SVN publishing, semantic-release for non-WordPress projects (Node.js/npm), fixing an already-working semantic-release config, or Dependabot setup.
 ---
 
 # WordPress Theme: Semantic Release & GitHub Deployment
@@ -17,7 +17,9 @@ Set up a complete automated release pipeline for any WordPress theme. The develo
 | `package.json` | Node.js devDependencies | Always (create or update) |
 | `.gitignore` additions | Ignore node_modules etc. | Always |
 | `CONTRIBUTING.md` | Developer guide: workflow, PR naming, examples | Always |
-| `build-release.sh` | Create clean installable ZIP for each release | If ZIP assets enabled |
+| `build-release.sh` | Create clean installable ZIP for each release | If ZIP assets or GitHub beta releases enabled |
+| `beta.sh` | Build beta ZIP locally for manual testing | If beta testing enabled |
+| `.github/workflows/beta-release.yml` | Manual trigger for GitHub beta pre-releases | If GitHub beta releases enabled |
 | `includes/github-updater/*.php` | WP Admin dashboard widget + auto-update | If updater enabled |
 
 ## Phase 1: Auto-detection
@@ -44,13 +46,13 @@ Present what you detected and ask the user to confirm or adjust. Keep it convers
 
 ### Optional features (present as choices):
 
-3. **Pre-release channel** — A separate branch (default: `beta`) that produces versions like `1.3.0-beta.1`
-   - When beta is stable, merge it to main for the official release
-   - Useful for staging/testing environments
+3. **Beta testing** — Local script (`beta.sh`) to quickly build beta ZIPs for manual testing
+   - Creates a ZIP with `-beta` directory suffix so WordPress treats it as a separate theme
+   - Runs locally (macOS-compatible), no CI needed
+   - Optionally also add a **GitHub Actions beta trigger** (`beta-release.yml`) — a "Run workflow" button that creates a proper pre-release on GitHub with a ZIP attached. No merge required — pick any branch from the UI.
 
 4. **ZIP asset on GitHub Releases** — Attach a clean .zip to each release, ready to install in WordPress
    - Excludes dev files (.git, node_modules, config files)
-   - If pre-release is also enabled, beta ZIPs use a `-beta` suffix in the directory name so WordPress treats them as a separate theme — enables side-by-side testing of stable and beta
 
 5. **WP Admin auto-updater** — Dashboard widget + integration with WordPress core update system
    - Shows current vs. latest version on the Dashboard
@@ -69,7 +71,8 @@ Main:  [branch]
 Features:
   [x] Semantic release + changelog
   [x] PR lint (Conventional Commits)
-  [ ] Pre-release channel (beta)
+  [ ] Beta testing (beta.sh)
+  [ ] GitHub beta releases (workflow_dispatch)
   [ ] ZIP asset on releases
   [ ] WP Admin updater (private repo)
 
@@ -91,21 +94,20 @@ Every template uses these placeholders — resolve them from detection + intervi
 | `{{REPO_OWNER}}` | `johndoe` | Git remote |
 | `{{REPO_NAME}}` | `my-theme` | Git remote |
 | `{{MAIN_BRANCH}}` | `main` | Git / user choice |
-| `{{BETA_BRANCH}}` | `beta` | User choice |
 | `{{TEXT_DOMAIN}}` | `my-theme` | style.css or slug |
 | `{{PREFIX}}` | `my_theme` | Snake_case of slug |
 | `{{PREFIX_UPPER}}` | `MY_THEME` | Uppercase of prefix |
 
 ### Step 1: `.releaserc.json`
-Read `references/releaserc.md`. Choose the appropriate template based on:
-- Pre-release enabled? → adds beta branch to branches array
+Read `references/releaserc.md`. Always uses a single release branch. Choose the appropriate plugins template based on:
 - ZIP assets? → uses `build-release.sh` in exec plugin + github assets config
 - No ZIP? → uses inline `sed` command in exec plugin
 
 ### Step 2: GitHub Actions workflows
 Read `references/workflows.md`.
-- `release.yml` — triggers on main branch (+ beta if pre-release)
-- `pr-lint.yml` — validates PR titles against main (+ beta if pre-release)
+- `release.yml` — triggers on main branch push
+- `pr-lint.yml` — validates PR titles against main
+- `beta-release.yml` — (if GitHub beta releases enabled) manual workflow_dispatch trigger
 
 ### Step 3: `package.json`
 If none exists, create a minimal one. If one exists, merge devDependencies.
@@ -129,10 +131,16 @@ node_modules/
 ### Step 5: `CONTRIBUTING.md`
 Read `references/contributing.md`. Customize with theme name, branch names, and enabled features.
 
-### Step 6: `build-release.sh` (if ZIP assets)
-Read `references/build-script.md`. Make executable with `chmod +x`.
+### Step 6: `build-release.sh` (if ZIP assets or GitHub beta releases)
+Read `references/build-script.md`. Make executable with `chmod +x`. This script is shared between stable releases (via semantic-release) and beta releases (via `beta-release.yml`).
 
-### Step 7: GitHub updater module (if enabled)
+### Step 7: `beta.sh` (if beta testing)
+Read `references/beta-script.md`. Make executable with `chmod +x`.
+
+### Step 8: `beta-release.yml` (if GitHub beta releases)
+Read `references/workflows.md` — the `beta-release.yml` section. This workflow requires `build-release.sh` to exist. If the user enabled GitHub beta releases but not ZIP assets, still create `build-release.sh` (Step 6).
+
+### Step 9: GitHub updater module (if enabled)
 Read `references/github-updater.md`. Create `includes/github-updater/` with PHP files.
 
 For **public repos**: generate loader, client, updater, dashboard-widget (4 files).
@@ -161,7 +169,6 @@ Present clear, actionable next steps with specific instructions.
 2. **Branch protection for `{{MAIN_BRANCH}}`** — Settings → Branches → Add rule:
    - Require pull request before merging
    - Require status checks: "Validate PR title"
-   - (If pre-release: add same rule for `{{BETA_BRANCH}}`)
 
 ### If private repo + auto-updater:
 
@@ -207,10 +214,8 @@ PR title → version bump:
   docs/chore/.. → no release
 ```
 
-If pre-release:
+If beta testing:
 ```
-feature → PR to {{BETA_BRANCH}} → v1.3.0-{{BETA_BRANCH}}.1
-{{BETA_BRANCH}} → PR to {{MAIN_BRANCH}} → v1.3.0 (stable)
+Local beta:   bash beta.sh → upload ZIP to staging WP
+GitHub beta:  Actions → Beta Release → Run workflow → pick branch → pre-release created
 ```
-
-> Note: the pre-release identifier in the version tag matches the branch name (e.g. `staging` → `v1.3.0-staging.1`, `beta` → `v1.3.0-beta.1`).

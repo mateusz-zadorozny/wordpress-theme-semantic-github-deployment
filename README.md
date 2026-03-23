@@ -16,7 +16,7 @@ Tell Claude to set up releases for your WordPress theme and this skill handles e
 
 ### Optional features
 
-- **Pre-release channel** — beta branch producing versions like `1.3.0-beta.1`
+- **Beta testing** — local `beta.sh` script for quick beta ZIPs + optional GitHub Actions manual trigger for creating beta pre-releases from any branch (no merge conflicts)
 - **ZIP build assets** — clean installable `.zip` attached to each GitHub Release
 - **WP Admin auto-updater** — dashboard widget + one-click updates from GitHub (supports both public and private repos)
 
@@ -52,7 +52,7 @@ Open Claude Code in your WordPress theme's root directory and say something like
 The skill will:
 
 1. **Auto-detect** your theme name, git remote, branch, and existing config
-2. **Interview** you about optional features (beta channel, ZIP assets, WP updater)
+2. **Interview** you about optional features (beta testing, ZIP assets, WP updater)
 3. **Generate** all configuration files with your theme's details filled in
 4. **Install** npm dependencies
 5. **Guide** you through GitHub repo settings (squash merge, branch protection)
@@ -66,7 +66,9 @@ The skill will:
 | `.github/workflows/pr-lint.yml` | PR title validation | Always |
 | `package.json` | Node.js devDependencies | Always |
 | `CONTRIBUTING.md` | Developer workflow guide | Always |
-| `build-release.sh` | ZIP builder for releases | If ZIP enabled |
+| `build-release.sh` | ZIP builder for releases | If ZIP or GitHub beta enabled |
+| `beta.sh` | Local beta ZIP builder | If beta testing enabled |
+| `.github/workflows/beta-release.yml` | Manual beta release trigger | If GitHub beta enabled |
 | `includes/github-updater/*.php` | WP dashboard widget + auto-update | If updater enabled |
 
 ## Daily workflow after setup
@@ -81,10 +83,10 @@ PR title examples:
   docs: update README               --> no release
 ```
 
-With pre-release enabled (tag uses the branch name as identifier):
+With beta testing enabled:
 ```
-feature  -->  PR to staging  -->  v1.3.0-staging.1
-staging  -->  PR to main     -->  v1.3.0 (stable)
+Local:   bash beta.sh  -->  upload ZIP to staging WP
+GitHub:  Actions > Beta Release > Run workflow > pick branch  -->  pre-release with ZIP
 ```
 
 ## What gets installed in your project
@@ -109,6 +111,20 @@ These are **devDependencies only** — they run in GitHub Actions CI, never on y
 ## Author
 
 Built by [Mateusz Zadorozny](https://shift64.com) — WordPress & WooCommerce development, B2B e-commerce, CI/CD automation.
+
+## Changelog
+
+### 1.0.1
+
+- **Replaced pre-release branch workflow with local beta testing** — no more dedicated `beta` branch and merge conflicts. Beta is now handled via `beta.sh` (local macOS script) and an optional `workflow_dispatch` GitHub Action that builds beta pre-releases from any branch on demand.
+- Added `references/beta-script.md` template for `beta.sh`
+- Added `beta-release.yml` workflow template to `references/workflows.md`
+- Removed `{{BETA_BRANCH}}` placeholder — single release branch only
+- Updated all reference files and CONTRIBUTING.md template to reflect new beta flow
+
+### 1.0.0
+
+- Initial release — semantic-release pipeline, PR linter, ZIP assets, WP Admin auto-updater, pre-release branch support
 
 ## License
 

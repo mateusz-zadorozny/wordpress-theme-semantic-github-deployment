@@ -1,9 +1,9 @@
 # build-release.sh Template
 
-This script is called by semantic-release via `@semantic-release/exec` during the `prepare` step. It:
+This script is called by semantic-release via `@semantic-release/exec` during the `prepare` step, and also reused by the `beta-release.yml` workflow for manual beta builds. It:
 1. Updates the `Version:` line in `style.css`
 2. Creates a clean ZIP file excluding development files
-3. For beta versions, uses a `-beta` directory suffix so WordPress treats it as a separate theme
+3. For beta versions (version string contains "beta"), uses a `-beta` directory suffix so WordPress treats it as a separate theme
 
 ## Template
 
@@ -66,6 +66,6 @@ echo "Created {{THEME_SLUG}}.zip (v${VERSION}, dir: ${DIR_NAME})"
 
 - The `rsync --exclude` list covers common development files. Add project-specific exclusions as needed (e.g., `composer.json`, `docs/`, benchmark files).
 - The `sed -i` command uses GNU syntax (no `''` after `-i`) — correct for GitHub Actions (Ubuntu).
-- If pre-release is NOT enabled, the beta directory logic still works correctly (the condition simply never matches), so you can include it regardless.
+- The beta directory logic is always included. For stable releases the condition never matches. For beta releases (via `beta-release.yml` workflow), the version contains "beta" and the `-beta` directory suffix is used.
 - The ZIP file name is always `{{THEME_SLUG}}.zip` — this must match the `assets.path` in `.releaserc.json`.
 - Make this file executable after creating it: `chmod +x build-release.sh`

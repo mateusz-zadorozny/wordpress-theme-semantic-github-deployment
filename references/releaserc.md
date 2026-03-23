@@ -3,30 +3,19 @@
 ## How the config is composed
 
 The `.releaserc.json` has two variable parts:
-1. **`branches`** — depends on whether pre-release is enabled
+1. **`branches`** — always a single release branch
 2. **`plugins`** array — depends on whether ZIP assets are enabled
 
-Everything else is constant. Compose the final config by picking the right branches + plugins combination.
+Everything else is constant. Compose the final config by picking the right plugins combination.
 
 ## Branches
 
-**Without pre-release:**
+Always a single release branch:
 ```json
 "branches": ["{{MAIN_BRANCH}}"]
 ```
 
-**With pre-release:**
-```json
-"branches": [
-    "{{MAIN_BRANCH}}",
-    {
-        "name": "{{BETA_BRANCH}}",
-        "prerelease": true
-    }
-]
-```
-
-> **How `"prerelease": true` works:** When set to `true`, semantic-release uses the **branch name** as the pre-release identifier. So a branch named `staging` produces `v1.0.0-staging.1`, and a branch named `beta` produces `v1.0.0-beta.1`. This is intentional — the tag always matches the branch name, making it clear where a release came from. No extra configuration needed.
+> **No beta branch in semantic-release.** Beta testing is handled separately — either locally via `beta.sh` or via a manual GitHub Actions trigger (`workflow_dispatch`). This avoids merge conflicts between diverging branches.
 
 ## Plugins: without ZIP assets
 
